@@ -361,49 +361,64 @@ document.addEventListener("DOMContentLoaded", function() {
   var audioControlPanel = document.createElement("div");
   audioControlPanel.style.cssText = "position:fixed; top:20px; right:20px; z-index:10000; background:rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding:12px; border-radius:12px; color:white; display:flex; gap:8px; box-shadow:0 8px 32px rgba(0,0,0,0.15); border:1px solid rgba(255,255,255,0.2);";
   
-  // Add play button
-  var playBtn = document.createElement("button");
-  playBtn.innerHTML = "<span style='margin-right:6px;'>▶</span>播放音乐";
-  playBtn.style.cssText = "background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:500; transition:all 0.3s ease; box-shadow:0 4px 15px rgba(102,126,234,0.3);";
-  playBtn.onclick = function() {
+  // Add toggle button for play/pause
+  var toggleBtn = document.createElement("button");
+  var isPlaying = false;
+  
+  // Function to update button state
+  function updateButtonState() {
+    if (isPlaying) {
+      toggleBtn.innerHTML = "<span style='margin-right:6px;'>⏸</span>音乐";
+      toggleBtn.style.background = "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)";
+      toggleBtn.style.boxShadow = "0 4px 15px rgba(240,147,251,0.3)";
+    } else {
+      toggleBtn.innerHTML = "<span style='margin-right:6px;'>▶</span>音乐";
+      toggleBtn.style.background = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+      toggleBtn.style.boxShadow = "0 4px 15px rgba(102,126,234,0.3)";
+    }
+  }
+  
+  // Set initial button state
+  updateButtonState();
+  
+  // Button styling
+  toggleBtn.style.cssText = "color:white; border:none; padding:8px 20px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:500; transition:all 0.3s ease; min-width:120px;";
+  
+  // Toggle function
+  toggleBtn.onclick = function() {
     var music = document.getElementById("myAudio");
     if (music) {
-      music.muted = false;
-      music.play();
+      if (isPlaying) {
+        music.pause();
+      } else {
+        music.muted = false;
+        music.play();
+      }
+      isPlaying = !isPlaying;
+      updateButtonState();
     }
   };
   
-  // Add hover effect for play button
-  playBtn.addEventListener("mouseenter", function() {
+  // Add hover effect
+  toggleBtn.addEventListener("mouseenter", function() {
     this.style.transform = "translateY(-2px)";
-    this.style.boxShadow = "0 6px 20px rgba(102,126,234,0.4)";
+    this.style.boxShadow = isPlaying ? "0 6px 20px rgba(240,147,251,0.4)" : "0 6px 20px rgba(102,126,234,0.4)";
   });
-  playBtn.addEventListener("mouseleave", function() {
+  toggleBtn.addEventListener("mouseleave", function() {
     this.style.transform = "translateY(0)";
-    this.style.boxShadow = "0 4px 15px rgba(102,126,234,0.3)";
+    updateButtonState(); // Reset box shadow to match current state
   });
   
-  // Add pause button
-  var pauseBtn = document.createElement("button");
-  pauseBtn.innerHTML = "<span style='margin-right:6px;'>⏸</span>暂停音乐";
-  pauseBtn.style.cssText = "background:linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:500; transition:all 0.3s ease; box-shadow:0 4px 15px rgba(240,147,251,0.3);";
-  pauseBtn.onclick = function() {
-    var music = document.getElementById("myAudio");
-    if (music) music.pause();
-  };
+  // Add audio ended event listener to update button state
+  var music = document.getElementById("myAudio");
+  if (music) {
+    music.addEventListener("ended", function() {
+      isPlaying = false;
+      updateButtonState();
+    });
+  }
   
-  // Add hover effect for pause button
-  pauseBtn.addEventListener("mouseenter", function() {
-    this.style.transform = "translateY(-2px)";
-    this.style.boxShadow = "0 6px 20px rgba(240,147,251,0.4)";
-  });
-  pauseBtn.addEventListener("mouseleave", function() {
-    this.style.transform = "translateY(0)";
-    this.style.boxShadow = "0 4px 15px rgba(240,147,251,0.3)";
-  });
-  
-  audioControlPanel.appendChild(playBtn);
-  audioControlPanel.appendChild(pauseBtn);
+  audioControlPanel.appendChild(toggleBtn);
   
   document.body.appendChild(audioControlPanel);
 });
